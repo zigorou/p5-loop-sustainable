@@ -13,23 +13,24 @@ subtest 'strategy: ByLoad' => sub {
         1  => 0.1,
         2  => 0.1,
         3  => 0.1,
-        4  => 0.1 + ( 1 + 2 + 3 ) * 0.05 / 3,
-        5  => 0.1 + ( 1 + 2 + 3 ) * 0.05 / 3,
-        6  => 0.1 + ( 1 + 2 + 3 ) * 0.05 / 3,
-        7  => 0.1 + ( 4 + 5 + 6 ) * 0.05 / 3,
-        8  => 0.1 + ( 4 + 5 + 6 ) * 0.05 / 3,
-        9  => 0.1 + ( 4 + 5 + 6 ) * 0.05 / 3,
-        10 => 0.1 + ( 7 + 8 + 9 ) * 0.05 / 3,
-        11 => 0.1 + ( 7 + 8 + 9 ) * 0.05 / 3,
-        12 => 0.1 + ( 7 + 8 + 9 ) * 0.05 / 3,
-        13 => 0.1 + ( 10 + 11 + 12 ) * 0.05 / 3,
-        14 => 0.1 + ( 10 + 11 + 12 ) * 0.05 / 3,
-        15 => 0.1 + ( 10 + 11 + 12 ) * 0.05 / 3,
+        4  => 0.1 + ( 1 + 2 + 3 ) * 0.01 / 3,
+        5  => 0.1 + ( 1 + 2 + 3 ) * 0.01 / 3,
+        6  => 0.1 + ( 1 + 2 + 3 ) * 0.01 / 3,
+        7  => 0.1 + ( 4 + 5 + 6 ) * 0.01 / 3,
+        8  => 0.1 + ( 4 + 5 + 6 ) * 0.01 / 3,
+        9  => 0.1 + ( 4 + 5 + 6 ) * 0.01 / 3,
+        10 => 0.1 + ( 7 + 8 + 9 ) * 0.01 / 3,
+        11 => 0.1 + ( 7 + 8 + 9 ) * 0.01 / 3,
+        12 => 0.1 + ( 7 + 8 + 9 ) * 0.01 / 3,
+        13 => 0.1 + ( 10 + 11 + 12 ) * 0.01 / 3,
+        14 => 0.1 + ( 10 + 11 + 12 ) * 0.01 / 3,
+        15 => 0.1 + ( 10 + 11 + 12 ) * 0.01 / 3,
     );
 
     my $result = loop_sustainable(
         sub {
             my ( $execute_count, $wait_interval ) = @_;
+
             cmp_ok $wait_interval, '>=',
               $expected_wait_interval{$execute_count},
               sprintf(
@@ -38,8 +39,9 @@ subtest 'strategy: ByLoad' => sub {
                   $expected_wait_interval{$execute_count}
               );
 
-            my $sleep_time = $execute_count * 0.05;
+            my $sleep_time = $execute_count * 0.011;
             Time::HiRes::sleep( $sleep_time );
+
             return $execute_count;
         },
         sub {
@@ -57,7 +59,7 @@ subtest 'strategy: ByLoad' => sub {
     );
 
     is( $result->{executed}, 15, 'executed count' );
-    cmp_ok( $result->{total_time}, '>', sum( 1..15 ) * 0.05, 'total time' );
+    cmp_ok( $result->{total_time}, '>=', sum( 1..15 ) * 0.01, 'total time' );
 };
 
 subtest 'strategy: MySQL::BalancedReplication' => sub {
@@ -106,7 +108,7 @@ subtest 'strategy: MySQL::BalancedReplication' => sub {
             }
 
             Time::HiRes::sleep( 0.01 );
-            
+
             return $execute_count;
         },
         sub {
