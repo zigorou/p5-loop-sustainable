@@ -10,7 +10,6 @@ use Class::Accessor::Lite (
     rw  => [qw/dbh capable_behind_seconds on_error_scale_factor on_error_croak/],
 );
 use List::Util qw(max);
-use Try::Tiny;
 
 our $VERSION = '0.01';
 
@@ -34,15 +33,14 @@ sub wait_correction {
 
     my $second_behind_master; ;
 
-    try {
+    eval {
         my $dbh = $self->{dbh};
         my $status = $dbh->selectrow_hashref('SHOW SLAVE STATUS') or croak($dbh->errstr);
         if ( defined $status->{Seconds_Behind_Master} ) {
             $second_behind_master = $status->{Seconds_Behind_Master};
         }
-    }
-    catch {
-        my $e = $_;
+    };
+    if (my $e = $@) {
         if ( $self->{on_error_croak} ) {
             croak $e;
         }

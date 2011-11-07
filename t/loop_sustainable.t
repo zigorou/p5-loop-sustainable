@@ -2,6 +2,10 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Requires qw(
+  DBI
+  DBD::Mock
+);
 
 use DBI;
 use List::Util qw(sum);

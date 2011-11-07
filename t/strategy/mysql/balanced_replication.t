@@ -3,6 +3,10 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Requires qw(
+  DBI
+  DBD::Mock
+);
 
 use DBI;
 use DBD::Mock;
