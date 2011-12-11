@@ -5,10 +5,9 @@ all_from 'lib/Loop/Sustainable.pm';
 requires 'parent';
 requires 'Carp';
 requires 'Class::Accessor::Lite';
-requires 'Exporter';
 requires 'Class::Load';
+requires 'Exporter';
 requires 'List::Util';
-requires 'String::RewritePrefix';
 requires 'Time::HiRes';
 
 tests_recursive 't';
@@ -16,6 +15,7 @@ author_tests 'xt';
 
 test_requires 'DBI';
 test_requires 'DBD::Mock';
+test_requires 'Test::LoadAllModules';
 test_requires 'Test::More';
 test_requires 'Test::Exception';
 test_requires 'Test::Requires';

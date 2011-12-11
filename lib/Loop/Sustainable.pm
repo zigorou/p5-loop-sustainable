@@ -6,7 +6,6 @@ use warnings;
 use Carp;
 use Exporter qw(import);
 use Class::Load qw(load_class);
-use String::RewritePrefix;
 use Time::HiRes qw(tv_interval gettimeofday);
 
 our $VERSION = '0.01';
@@ -29,9 +28,8 @@ sub loop_sustainable (&&;$) {
     my $strategy_cb;
 
     if ( ref $args->{strategy} eq 'HASH' ) {
-        my ( $strategy_class ) = String::RewritePrefix->rewrite(+{ 
-            '' => 'Loop::Sustainable::Strategy::', '+' => ''
-        }, $args->{strategy}{class});
+        my ( $strategy_class ) = index($args->{strategy}{class}, '+') == 1 ?
+            substr($args->{strategy}{class}, 1) : 'Loop::Sustainable::Strategy::' . $args->{strategy}{class};
 
         load_class( $strategy_class );
 
