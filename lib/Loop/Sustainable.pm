@@ -85,7 +85,6 @@ sub loop_sustainable (&&;$) {
     );
 
     return wantarray ? %result : \%result;
-
 }
 
 1;
@@ -93,7 +92,7 @@ __END__
 
 =head1 NAME
 
-Loop::Sustainable - Loop callback sustainably.
+Loop::Sustainable - Provides sustainable loop.
 
 =head1 SYNOPSIS
 
@@ -126,7 +125,10 @@ Loop::Sustainable - Loop callback sustainably.
 
 =head1 DESCRIPTION
 
-Loop::Sustainable runs loop sustainably. Loop::Sustainable only exports loop_sustainable() function.
+Loop::Sustainable provides sustainable loop with callback. 
+The way of providing sustainable loop consists of inserting effectual wait time caliculated by strategy module into each loop execution.
+
+Loop::Sustainable only exports loop_sustainable() function.
 
 =head1 METHODS
 
@@ -148,13 +150,114 @@ $rv is array reference as \&cb return values.
 
 =item \%args
 
-Available keys are below.
+Available key-value pairs are following.
 
 =over
 
+=item strategy
+
+This value must be CODE reference or HASH reference with strategy module name and passing arguments to it.
+If you want to use built-in strategy module, 
+you would specify suffix of complete module name excluded 'Loop::Sustainable::Strategy::'.
+Or if you want to use non built-in strategy module, 
+you must specify full module name with prefix '+' char likes '+My::Strategy::Excellent'.
+
+The case of specify strategy module is following:
+
+  #!/usr/bin/env perl
+  
+  use strict;
+  use warnings;
+  use FindBin;
+  use lib "$FindBin::Bin/../lib";
+  
+  use Iterator::Simple qw(iter);
+  use Loop::Sustainable;
+  use POSIX qw(strftime);
+  use Time::HiRes ();
+  
+  my $iter = iter( [ 1 .. 10 ] );
+  
+  loop_sustainable {
+      my ( $i, $wait_interval ) = @_;
+      Time::HiRes::sleep( rand(1) );
+      warn sprintf(
+          "[%s] times: %d. wait_interval: %02.2f",
+          strftime( "%Y-%m-%d %H:%M:%S", localtime ),
+          $i, $wait_interval
+      );
+      $iter->next;
+  } (
+      sub {
+          my ( $i, $time_sum, $rv ) = @_;
+          return not defined $rv->[0] ? 1 : 0;
+      },
+      {
+          check_strategy_interval => 2,
+          wait_interval           => 0.5,
+          strategy                => {
+              class => 'ByLoad',
+              args  => { load => 0.5 }
+          }
+      }
+  );
+
+The case of specify code refernce is following:
+
+  #!/usr/bin/env perl
+  
+  use strict;
+  use warnings;
+  use FindBin;
+  use lib "$FindBin::Bin/../lib";
+  
+  use Loop::Sustainable;
+  use POSIX qw(strftime);
+  
+  loop_sustainable {
+      my ( $i, $wait_interval ) = @_;
+      warn sprintf(
+          "[%s] times: %d. interval: %s sec",
+          strftime( "%Y-%m-%d %H:%M:%S", localtime ),
+          $i, $wait_interval
+      );
+  } (
+      sub {
+          my ( $i, $time_sum, $rv ) = @_;
+          ( $i > 11 ) ? 1 : 0;
+      },
+      {
+          wait_interval           => 0,
+          check_strategy_interval => 2,
+          strategy                => sub {
+              my ( $i, $time_sum, $rv ) = @_;
+              return $i;
+            }
+      }
+  );
+
+This sample helps your understanding.
+Run this code, you would see like following output:
+
+  [2011-12-11 23:53:02] times: 1. interval: 0 sec at -e line 1.
+  [2011-12-11 23:53:02] times: 2. interval: 0 sec at -e line 1.
+  [2011-12-11 23:53:02] times: 3. interval: 2 sec at -e line 1.
+  [2011-12-11 23:53:04] times: 4. interval: 2 sec at -e line 1.
+  [2011-12-11 23:53:06] times: 5. interval: 4 sec at -e line 1.
+  [2011-12-11 23:53:10] times: 6. interval: 4 sec at -e line 1.
+  [2011-12-11 23:53:14] times: 7. interval: 6 sec at -e line 1.
+  [2011-12-11 23:53:20] times: 8. interval: 6 sec at -e line 1.
+  [2011-12-11 23:53:26] times: 9. interval: 8 sec at -e line 1.
+  [2011-12-11 23:53:34] times: 10. interval: 8 sec at -e line 1.
+  [2011-12-11 23:53:42] times: 11. interval: 10 sec at -e line 1.
+  [2011-12-11 23:53:52] times: 12. interval: 10 sec at -e line 1.
+  
+The interval value point to wait time on the loop. On times equals 3, interval value is increased.
+Because after execution at 2 times, call strategy code and set it's result value as next wait interval.
+
 =item wait_interval
 
-The base waiting time after running each loop.
+The base waiting time after running each loop. So each loop must be forced to wait for this value. 
 
 =item check_strategy_interval
 
@@ -169,6 +272,20 @@ The count of next check time by strategy.
 Toru Yamaguchi E<lt>zigorou@cpan.orgE<gt>
 
 =head1 SEE ALSO
+
+Built-in strategy modules are following:
+
+=over
+
+=item L<Loop::Sustainable::Strategy::ByLoad>
+
+Calculates wait interval by execution time and load ratio.
+
+=item L<Loop::Sustainable::Strategy::MySQL::BalancedReplication>
+
+Calculates wait interval by Seconds_Behind_Master of SHOW SLAVE STATUS command return value.
+
+=back
 
 =head1 LICENSE
 

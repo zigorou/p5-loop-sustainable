@@ -62,15 +62,33 @@ __END__
 
 =head1 NAME
 
-Loop::Sustainable::Strategy::MySQL::BalancedReplication - write short description for Loop::Sustainable::Strategy::MySQL::BalancedReplication
+Loop::Sustainable::Strategy::MySQL::BalancedReplication - Calculates wait interval by MySQL slave server delaying.
 
 =head1 SYNOPSIS
 
-  use Loop::Sustainable::Strategy::MySQL::BalancedReplication;
+    use Loop::Sustainable;
+
+    my $dbh_slave = DBI->connect(...);
+    loop_sustainable {
+        ### master heavy process
+    } (
+        sub {
+           ### termination condition
+        },
+        {
+           strategy => {
+               class => 'MySQL::BalancedReplication',
+               args  => {
+                    dbh                    => $dbh_slave,
+                    capable_behind_seconds => 2,
+                    on_error_scale_factor  => 30,
+                    on_error_croak         => 0,
+               },
+           }
+        }
+    );
 
 =head1 DESCRIPTION
-q
-=head1 METHODS
 
 =head1 METHODS
 
@@ -80,11 +98,26 @@ q
 
 =item dbh
 
-L<DBI::db> object
+L<DBI::db> object. The $dbh must be connected to MySQL slave server with previledge 'SHOW SLAVE STATUS' command.
 
 =item capable_behind_seconds
 
+Permits seconds of replication delaying. 
+This module treats delaying times as this value from read delay times via Seconds_Behind_Master value.
+
+Default value is 5 seconds.
+
 =item on_error_scale_factor
+
+When a error is occuring in fetching slave status, 
+This module treats delay times as multiply temporary delay times by this value.
+
+Default value is 5.
+
+=item on_error_croak
+
+When a error is occuring in fetching slave status and this value is true value,
+This module will raise error. Default value is false. 
 
 =back
 

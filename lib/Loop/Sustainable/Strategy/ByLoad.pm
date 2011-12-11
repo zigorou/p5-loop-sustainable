@@ -15,7 +15,7 @@ our $VERSION = '0.01';
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new( @_ );
-    $self->{load} ||= 0.5;
+    $self->{load} = 0.5 unless (defined $self->{load});
     $self;
 }
 
@@ -34,11 +34,29 @@ Loop::Sustainable::Strategy::ByLoad - write short description for Loop::Sustaina
 
 =head1 SYNOPSIS
 
-  use Loop::Sustainable::Strategy::ByLoad;
+  use Loop::Sustainable;
+
+  loop_sustainable {
+      my ( $i, $time_sum ) = @_;
+      #### maybe heavy process
+  } (
+      sub {
+           my ($i, $time_sum, $rv ) = @_;
+           not defined $rv->[0] ? 1 : 0;
+      },
+      {
+          strategy => {
+              class => 'ByLoad',
+              args  => { load => 0.5 },
+          }
+      }
+  );
+
 
 =head1 DESCRIPTION
 
-=head1 METHODS
+Loop::Sustainable::Strategy::ByLoad provides wait interval time calculated by total execution time and 
+loop execution count, specified load ratio.
 
 =head1 METHODS
 
