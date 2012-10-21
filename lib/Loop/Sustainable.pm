@@ -8,7 +8,7 @@ use Exporter qw(import);
 use Class::Load qw(load_class);
 use Time::HiRes qw(tv_interval gettimeofday);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 our @EXPORT  = qw(loop_sustainable);
 
 sub loop_sustainable (&&;$) {
