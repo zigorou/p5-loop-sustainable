@@ -2,6 +2,7 @@
 Changes
 examples/001_use_buildin_strategy.pl
 examples/002_use_coderef_strategy.pl
+inc/DBD/Mock.pm
 inc/DBI.pm
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
