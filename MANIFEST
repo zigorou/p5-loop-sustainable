@@ -1,4 +1,8 @@
+.gitignore
 Changes
+examples/001_use_buildin_strategy.pl
+examples/002_use_coderef_strategy.pl
+inc/DBI.pm
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
 inc/Module/Install/Base.pm
@@ -10,14 +14,16 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Repository.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+inc/Test/Exception.pm
+inc/Test/LoadAllModules.pm
 inc/Test/More.pm
+inc/Test/Requires.pm
 lib/Loop/Sustainable.pm
 lib/Loop/Sustainable/Strategy.pm
 lib/Loop/Sustainable/Strategy/ByLoad.pm
 lib/Loop/Sustainable/Strategy/MySQL/BalancedReplication.pm
 Makefile.PL
 MANIFEST			This list of files
-META.yml
 README
 t/compile.t
 t/loop_sustainable.t
